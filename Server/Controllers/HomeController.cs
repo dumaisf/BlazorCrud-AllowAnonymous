@@ -12,13 +12,6 @@ namespace BlazorCrud.Server.Controllers
     [AllowAnonymous]
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _db;
-
-        public HomeController(ApplicationDbContext db)
-        {
-            _db = db;
-        }
-
         [HttpGet]
         public ActionResult<List<int>> GetAll()
         {
