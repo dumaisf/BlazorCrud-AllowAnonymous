@@ -1,0 +1,64 @@
+﻿@page "/"
+
+@using System.Net
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject HttpClient HttpClient
+
+@if (Busy)
+{
+    <div class="alert alert-info">Loading...</div> 
+}
+else if (Numbers == null)
+{
+    <div class="alert alert-warning">No numbers</div> 
+}
+else
+{
+    <ul>
+        @foreach (var number in Numbers)
+        {
+            <li>@number</li>
+        }
+    </ul>
+}
+
+@code {
+    public ICollection<int> Numbers { get; set; }
+
+    /// <summary>
+    /// Avoid concurrent requests
+    /// </summary>
+    private bool Busy;
+
+    /// <summary>
+    /// Load Numbers />.
+    /// </summary>
+    /// <returns>A <see cref="Task"/>.</returns>
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Busy)
+        {
+            Busy = true;
+
+            try
+            {
+                Numbers = await HttpClient.GetFromJsonAsync<List<int>>("home");
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                exception.Redirect();
+            }
+            catch (HttpRequestException)
+            {
+                Numbers = null;
+            }
+            finally
+            {
+                Busy = false;
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+}
